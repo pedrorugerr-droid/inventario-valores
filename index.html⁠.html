@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventário de Valores Pessoais · v3</title>
+  <style>
+    :root {
+      --primary:  #1E3A5F;
+      --phover:   #2D5A8E;
+      --accent:   #EBF4FF;
+      --text:     #1A2332;
+      --sub:      #4A5568;
+      --muted:    #718096;
+      --bg:       #F7F9FC;
+      --card:     #FFFFFF;
+      --border:   #E2E8F0;
+      --gold:     #B7791F;
+      --goldbg:   #FFFBEB;
+      --warn:     #744210;
+      --warnbg:   #FFFAF0;
+      --warnbord: #F6AD55;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia','Times New Roman',serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding: 20px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── HEADER ── */
+    .hdr { text-align: center; padding: 32px 0 24px; }
+    .logo {
+      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--muted); font-family: Arial,sans-serif; margin-bottom: 12px;
+    }
+    h1  { font-size: 25px; font-weight: normal; color: var(--primary); margin-bottom: 8px; }
+    .lead { font-size: 15px; color: var(--sub); line-height: 1.7; max-width: 560px; margin: 0 auto; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card); border-radius: 12px;
+      padding: 36px; box-shadow: 0 2px 14px rgba(0,0,0,.07); margin-bottom: 20px;
+    }
+
+    /* ── INSTR ── */
+    .instr {
+      background: var(--accent); border: 1px solid #BEE3F8;
+      border-radius: 8px; padding: 18px 22px; margin-bottom: 26px;
+      font-size: 14px; color: var(--sub); line-height: 1.75;
+    }
+    .instr h3 {
+      font-size: 12px; letter-spacing: .6px; text-transform: uppercase;
+      color: var(--primary); font-family: Arial,sans-serif; margin-bottom: 10px;
+    }
+    .instr ul { padding-left: 18px; }
+    .instr li { margin-bottom: 5px; }
+
+    /* ── RESUME BANNER ── */
+    .resume-banner {
+      background: var(--warnbg); border: 1px solid var(--warnbord);
+      border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .resume-text { font-size: 14px; color: var(--warn); line-height: 1.5; }
+    .resume-text strong { display: block; font-size: 15px; }
+    .btn-resume {
+      padding: 10px 20px; background: var(--warn); color: white;
+      border: none; border-radius: 7px; font-size: 14px;
+      font-family: Arial,sans-serif; cursor: pointer; white-space: nowrap;
+    }
+    .btn-resume:hover { opacity: .85; }
+
+    /* ── BTNS PRIMÁRIOS ── */
+    .btn-primary {
+      display: block; width: 100%; max-width: 260px; margin: 0 auto;
+      padding: 14px 28px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 15px;
+      font-family: Georgia,serif; cursor: pointer; transition: background .2s;
+    }
+    .btn-primary:hover { background: var(--phover); }
+    .btn-secondary {
+      display: block; width: 100%; max-width: 260px; margin: 12px auto 0;
+      padding: 12px 24px; background: transparent; color: var(--primary);
+      border: 1.5px solid var(--primary); border-radius: 8px; font-size: 14px;
+      font-family: Georgia,serif; cursor: pointer; transition: all .2s;
+    }
+    .btn-secondary:hover { background: var(--primary); color: white; }
+
+    /* ── PROGRESS ── */
+    .prog-wrap { margin-bottom: 22px; }
+    .prog-meta {
+      display: flex; justify-content: space-between;
+      font-size: 12px; font-family: Arial,sans-serif; color: var(--muted); margin-bottom: 6px;
+    }
+    .prog-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width .3s; }
+
+    /* ── COMPARISON ── */
+    .cmp-grid {
+      display: grid; grid-template-columns: 1fr 38px 1fr;
+      margin-bottom: 26px; align-items: stretch;
+    }
+    .vpanel {
+      border: 1.5px solid var(--border); padding: 24px;
+      background: var(--card); display: flex; flex-direction: column;
+    }
+    .vpanel.pa { border-radius: 10px 0 0 10px; border-right: none; }
+    .vpanel.pb { border-radius: 0 10px 10px 0; border-left: none; }
+    .plabel {
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); font-family: Arial,sans-serif; margin-bottom: 13px;
+    }
+    .vdef { font-size: 15px; line-height: 1.78; color: var(--text); flex: 1; }
+    /* ── REFLEXÃO ── */
+    .reflection-wrap {
+      margin-bottom: 22px;
+    }
+    .reflection-label {
+      font-size: 12px; font-family: Arial,sans-serif; color: var(--muted);
+      margin-bottom: 6px; letter-spacing: .3px;
+    }
+    .reflection-label span { font-style: italic; }
+    textarea.reflection {
+      width: 100%; min-height: 72px; max-height: 160px;
+      padding: 12px 14px; font-size: 14px; font-family: Georgia,serif;
+      color: var(--text); background: var(--card);
+      border: 1.5px solid var(--border); border-radius: 8px;
+      resize: vertical; line-height: 1.6; transition: border-color .2s;
+    }
+    textarea.reflection:focus { outline: none; border-color: var(--primary); }
+    textarea.reflection::placeholder { color: var(--muted); font-style: italic; }
+    .vs-col {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-family: Arial,sans-serif; color: var(--muted);
+      border-top: 1.5px solid var(--border); border-bottom: 1.5px solid var(--border);
+      background: var(--bg);
+    }
+
+    /* ── CHOICE BUTTONS ── */
+    .choice-grid { display: grid; grid-template-columns: 1fr 1fr 70px 1fr 1fr; gap: 7px; }
+    .btn-c {
+      padding: 13px 8px; border: none; border-radius: 8px;
+      cursor: pointer; font-family: Arial,sans-serif; line-height: 1.3;
+      text-align: center; transition: opacity .15s, transform .15s;
+    }
+    .btn-c:hover  { opacity: .87; transform: translateY(-2px); }
+    .btn-c:active { transform: translateY(0); }
+    .btn-c .m { display: block; font-size: 13px; font-weight: bold; margin-bottom: 3px; }
+    .btn-c .s { display: block; font-size: 10px; opacity: .82; }
+    .c-aa { background: #1A2F4E; color: #fff; }
+    .c-a  { background: #2D5A8E; color: #fff; }
+    .c-eq { background: #6B7280; color: #fff; }
+    .c-b  { background: #6B3580; color: #fff; }
+    .c-bb { background: #441B5A; color: #fff; }
+    .btn-c.pressed { opacity: .55; transform: scale(.97); }
+
+    .kbd-hint {
+      font-size: 11px; font-family: Arial,sans-serif;
+      color: var(--muted); text-align: center; margin-top: 13px;
+    }
+    kbd {
+      background: #eee; border: 1px solid #ccc;
+      border-radius: 3px; padding: 1px 5px;
+      font-size: 10px; font-family: monospace;
+    }
+
+    /* ── CONFLICT SCREEN ── */
+    .conflict-counter {
+      text-align: center; font-size: 13px; font-family: Arial,sans-serif;
+      color: var(--muted); margin-bottom: 20px;
+    }
+    .conflict-desc {
+      background: var(--warnbg); border: 1px solid var(--warnbord);
+      border-radius: 8px; padding: 14px 18px; margin-bottom: 22px;
+      font-size: 13px; font-family: Arial,sans-serif; color: var(--warn); line-height: 1.6;
+    }
+    .conflict-desc strong { font-size: 14px; display: block; margin-bottom: 6px; }
+    .conflict-3col {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;
+    }
+    .c3card {
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 18px; background: var(--card); display: flex; flex-direction: column;
+    }
+    .c3def { font-size: 13px; line-height: 1.7; color: var(--text); flex: 1; margin-bottom: 14px; }
+    .c3name { font-size: 11px; color: var(--muted); font-family: Arial,sans-serif; margin-bottom: 12px; }
+    .c3name strong { color: var(--sub); font-size: 12px; }
+    .btn-pick {
+      padding: 9px 14px; border: none; border-radius: 7px;
+      background: var(--primary); color: white; cursor: pointer;
+      font-size: 13px; font-family: Arial,sans-serif; transition: background .2s;
+    }
+    .btn-pick:hover { background: var(--phover); }
+    .btn-skip-conflicts {
+      display: block; margin: 12px auto 0;
+      font-size: 13px; font-family: Arial,sans-serif;
+      color: var(--muted); background: none; border: none;
+      cursor: pointer; text-decoration: underline;
+    }
+
+    /* ── RESULTS ── */
+    .result-list {
+      background: var(--card); border-radius: 12px;
+      overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,.07);
+    }
+    .tier-hdr {
+      padding: 9px 22px;
+      font-size: 11px; font-family: Arial,sans-serif; letter-spacing: 1px; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .t-core      { background: var(--goldbg); color: var(--gold); }
+    .t-important { background: #EBF8FF; color: #2B6CB0; }
+    .t-secondary { background: #F7FAFC; color: #4A5568; }
+    .t-periph    { background: #F7F7F7; color: var(--muted); }
+    .r-item {
+      display: flex; align-items: flex-start; padding: 14px 22px;
+      border-bottom: 1px solid var(--border); gap: 16px;
+    }
+    .r-item:last-child { border-bottom: none; }
+    .r-rank {
+      font-size: 16px; font-weight: bold; color: var(--primary);
+      min-width: 30px; font-family: Arial,sans-serif; padding-top: 2px; text-align: right;
+    }
+    .r-rank.gd { color: var(--gold); }
+    .r-cont { flex: 1; }
+    .r-name { font-size: 15px; font-weight: bold; margin-bottom: 4px; }
+    .r-def  { font-size: 12px; color: var(--muted); line-height: 1.55; }
+    .r-elo  {
+      font-size: 11px; font-family: Arial,sans-serif; color: var(--muted);
+      padding-top: 3px; white-space: nowrap; text-align: right;
+    }
+
+    /* ── CLINICAL DATA (COLLAPSIBLE) ── */
+    .clinical-block {
+      background: var(--card); border-radius: 12px;
+      box-shadow: 0 2px 14px rgba(0,0,0,.07); margin-top: 20px; overflow: hidden;
+    }
+    details summary {
+      padding: 16px 22px; font-size: 13px; font-family: Arial,sans-serif;
+      color: var(--primary); cursor: pointer; letter-spacing: .3px;
+      border-bottom: 1px solid transparent;
+      list-style: none; display: flex; align-items: center; gap: 8px;
+    }
+    details summary::before { content: '▶'; font-size: 10px; transition: transform .2s; }
+    details[open] summary::before { transform: rotate(90deg); }
+    details[open] summary { border-bottom-color: var(--border); }
+    .clinical-inner { padding: 20px 22px; }
+    .c-kv {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+    }
+    .c-kv:last-child { border-bottom: none; }
+    .c-kv .k { color: var(--sub); }
+    .c-kv .v { color: var(--text); font-weight: bold; font-family: Arial,sans-serif; }
+    .c-section-title {
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); font-family: Arial,sans-serif;
+      margin: 20px 0 10px;
+    }
+    .c-section-title:first-child { margin-top: 0; }
+    .slow-item {
+      display: flex; gap: 10px; padding: 7px 0;
+      border-bottom: 1px solid var(--border); font-size: 13px; align-items: center;
+    }
+    .slow-item:last-child { border-bottom: none; }
+    .slow-time {
+      font-family: Arial,sans-serif; font-size: 12px;
+      color: var(--warn); font-weight: bold; min-width: 55px; text-align: right;
+    }
+    .slow-names { color: var(--sub); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 620px) {
+      .cmp-grid { grid-template-columns: 1fr; }
+      .vpanel.pa { border-radius: 10px 10px 0 0; border-right: 1.5px solid var(--border); border-bottom: none; }
+      .vpanel.pb { border-radius: 0 0 10px 10px; border-left: 1.5px solid var(--border); border-top: none; }
+      .vs-col { border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); padding: 5px; }
+      .choice-grid { grid-template-columns: 1fr 1fr; }
+      .c-eq { grid-column: 1/-1; }
+      .conflict-3col { grid-template-columns: 1fr; }
+      .resume-banner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ══════════════════════════════════════════════════════
+       TELA 1: BOAS-VINDAS
+  ══════════════════════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen active">
+    <div class="hdr">
+      <div class="logo">Instrumento Clínico · Versão 3.0</div>
+      <h1>Inventário de Valores Pessoais</h1>
+      <p class="lead">Avaliação sistemática de 63 valores fundamentais por meio de comparações pareadas.</p>
+    </div>
+    <div class="card">
+      <div id="resume-banner" class="resume-banner" style="display:none;">
+        <div class="resume-text">
+          <strong>Progresso salvo encontrado</strong>
+          <span id="resume-info"></span>
+        </div>
+        <button class="btn-resume" onclick="resumeTest()">Continuar →</button>
+      </div>
+      <div class="instr">
+        <h3>Como funciona</h3>
+        <ul>
+          <li>Você verá dois valores por vez, descritos pela sua <strong>definição comportamental</strong>. O nome aparece apenas abaixo, como referência.</li>
+          <li>Indique qual deles tem maior importância <strong>na forma como você de fato vive e toma decisões</strong> — não como você gostaria de ser.</li>
+          <li>Cinco opções: <em>Muito mais A · Mais A · Iguais · Mais B · Muito mais B</em>.</li>
+          <li>O processo envolve <strong>186 comparações em 6 rodadas</strong>. Duração estimada: 25–35 minutos.</li>
+          <li>Em cada comparação você pode escrever uma <strong>reflexão livre</strong> — opcional — que fica registrada como um diário pessoal de valores.</li>
+          <li>Seu progresso é salvo automaticamente — você pode fechar e continuar depois.</li>
+        </ul>
+      </div>
+      <button class="btn-primary" onclick="startFresh()">Iniciar Inventário</button>
+      <button class="btn-secondary" id="btn-discard" style="display:none;" onclick="discardAndStart()">Descartar progresso e começar do zero</button>
+
+      <div class="kbd-hint" style="margin-top:20px;">
+        Atalhos: <kbd>1</kbd> Muito mais A &nbsp;·&nbsp; <kbd>2</kbd> Mais A &nbsp;·&nbsp;
+        <kbd>3</kbd> Iguais &nbsp;·&nbsp; <kbd>4</kbd> Mais B &nbsp;·&nbsp; <kbd>5</kbd> Muito mais B
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TELA 2: COMPARAÇÃO
+  ══════════════════════════════════════════════════════ -->
+  <div id="screen-comparison" class="screen">
+    <div class="hdr" style="padding:18px 0 14px;">
+      <div class="logo">Inventário de Valores Pessoais</div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-meta">
+        <span id="prog-label">Comparação 1 de 186</span>
+        <span id="round-label">Rodada 1 de 6</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="cmp-grid">
+      <div class="vpanel pa">
+        <div class="plabel">Valor A</div>
+        <div class="vdef" id="def-a"></div>
+      </div>
+      <div class="vs-col">vs</div>
+      <div class="vpanel pb">
+        <div class="plabel">Valor B</div>
+        <div class="vdef" id="def-b"></div>
+      </div>
+    </div>
+
+    <div class="reflection-wrap">
+      <div class="reflection-label">
+        Reflexão <span>(opcional — o que esta comparação fez você perceber?)</span>
+      </div>
+      <textarea id="reflection-input" class="reflection"
+        placeholder="Escreva aqui suas observações sobre estes dois valores, como eles se relacionam com sua vida, ou por que um parece mais importante agora..."></textarea>
+    </div>
+
+    <div class="choice-grid">
+      <button id="btn1" class="btn-c c-aa" onclick="answer(4,0)">
+        <span class="m">← Muito mais A</span><span class="s">A é muito mais importante</span>
+      </button>
+      <button id="btn2" class="btn-c c-a"  onclick="answer(2,0)">
+        <span class="m">← Mais A</span><span class="s">A é mais importante</span>
+      </button>
+      <button id="btn3" class="btn-c c-eq" onclick="answer(1,1)">
+        <span class="m">Iguais</span><span class="s">equivalentes</span>
+      </button>
+      <button id="btn4" class="btn-c c-b"  onclick="answer(0,2)">
+        <span class="m">Mais B →</span><span class="s">B é mais importante</span>
+      </button>
+      <button id="btn5" class="btn-c c-bb" onclick="answer(0,4)">
+        <span class="m">Muito mais B →</span><span class="s">B é muito mais importante</span>
+      </button>
+    </div>
+    <div class="kbd-hint"><kbd>1</kbd> &nbsp;<kbd>2</kbd> &nbsp;<kbd>3</kbd> &nbsp;<kbd>4</kbd> &nbsp;<kbd>5</kbd></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TELA 3: CONFLITOS
+  ══════════════════════════════════════════════════════ -->
+  <div id="screen-conflicts" class="screen">
+    <div class="hdr" style="padding:24px 0 18px;">
+      <div class="logo">Resolução de Inconsistências</div>
+      <h1>Verificação Final</h1>
+      <p class="lead">Identificamos situações em que suas preferências formaram ciclos. Isso é normal e esperado — valores complexos frequentemente se tensionam.</p>
+    </div>
+    <div id="conflict-card" class="card">
+      <div class="conflict-counter" id="conflict-counter"></div>
+      <div class="conflict-desc" id="conflict-desc"></div>
+      <div class="conflict-3col" id="conflict-3col"></div>
+      <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:8px;">
+        Selecione o valor <strong>mais importante</strong> dos três para resolver esta inconsistência.
+      </p>
+      <button class="btn-skip-conflicts" onclick="skipConflicts()">Pular esta etapa e ver resultado →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       TELA 4: RESULTADO
+  ══════════════════════════════════════════════════════ -->
+  <div id="screen-results" class="screen">
+    <div class="hdr">
+      <div class="logo">Resultado</div>
+      <h1>Seus Valores Pessoais</h1>
+      <p class="lead" id="res-sub"></p>
+    </div>
+    <div class="result-list" id="result-list"></div>
+
+    <div class="clinical-block" id="diary-block" style="display:none;">
+      <details>
+        <summary>Diário de Reflexões</summary>
+        <div class="clinical-inner" id="diary-inner"></div>
+      </details>
+    </div>
+
+    <div class="clinical-block">
+      <details>
+        <summary>Dados Clínicos (uso profissional)</summary>
+        <div class="clinical-inner" id="clinical-inner"></div>
+      </details>
+    </div>
+
+    <div style="text-align:center; margin-top:24px;">
+      <button class="btn-secondary" style="display:inline-block; width:auto;" onclick="goWelcome()">Novo Inventário</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     LÓGICA
+══════════════════════════════════════════════════════════════════════ -->
+<script>
+/* ─── 63 VALORES ─── */
+const VALUES = [
+  { id:  0, nome:"Ambição",               def:"Desejo intenso de estabelecer metas ousadas e empenhar-se continuamente para alcançá-las, encontrando realização no progresso." },
+  { id:  1, nome:"Aprendizado",            def:"Vontade permanente de adquirir novas informações e habilidades, encarando cada experiência como oportunidade de evolução." },
+  { id:  2, nome:"Autocuidado",            def:"Prioridade de atender às próprias necessidades físicas e emocionais, reconhecendo que manter equilíbrio sustenta o bem-estar." },
+  { id:  3, nome:"Aventura",               def:"Desejo de vivenciar o novo e enfrentar desafios imprevisíveis, usando o desconhecido como fonte de crescimento." },
+  { id:  4, nome:"Beleza",                 def:"Busca por padrões estéticos que evoquem harmonia, encontrando inspiração em formas, sons ou cores." },
+  { id:  5, nome:"Carinho",                def:"Expressão afetuosa por meio de gestos e palavras que fortalecem vínculos e trazem conforto emocional." },
+  { id:  6, nome:"Compaixão",              def:"Sensibilidade diante da dor alheia, acompanhada de genuína vontade de oferecer apoio e alívio." },
+  { id:  7, nome:"Competência",            def:"Busca por executar tarefas com preparo e qualidade, contando com habilidades firmes para superar desafios." },
+  { id:  8, nome:"Competitividade",        def:"Motivação para medir desempenho em relação a outros, usando a comparação para estimular aprimoramento." },
+  { id:  9, nome:"Conexão com a Natureza", def:"Vontade de integrar-se ao ambiente natural, reconhecendo nele fonte de renovação e clareza mental." },
+  { id: 10, nome:"Confiança",              def:"Sensação de segurança em si e nos demais, permitindo agir com tranquilidade baseada na boa-fé mútua." },
+  { id: 11, nome:"Conforto",               def:"Valorização de condições que promovam bem-estar e facilitem o descanso, recuperando energia sem excessos." },
+  { id: 12, nome:"Controle",               def:"Desejo de moldar situações para reduzir incertezas, conferindo clareza e previsibilidade às próprias ações." },
+  { id: 13, nome:"Cooperação",             def:"Disposição de unir esforços para alcançar objetivos comuns, valorizando a colaboração entre pessoas." },
+  { id: 14, nome:"Coragem",                def:"Disposição de agir apesar do medo, encarando riscos necessários para alcançar o que se considera valioso." },
+  { id: 15, nome:"Corporeidade",           def:"Valorização da experiência de existir por meio do corpo, reconhecendo seu papel central na vida." },
+  { id: 16, nome:"Criatividade",           def:"Aptidão para combinar ideias de modo original, abrindo caminhos inéditos para expressão e solução de desafios." },
+  { id: 17, nome:"Curiosidade",            def:"Impulso de investigar o desconhecido, mantendo-se atento a perguntas sem respostas imediatas." },
+  { id: 18, nome:"Disciplina",             def:"Capacidade de seguir rotinas estruturadas e manter foco, entendendo que o progresso exige constância." },
+  { id: 19, nome:"Diversão",               def:"Valorização de momentos que geram alegria, oferecendo descanso mental e recarregando a disposição." },
+  { id: 20, nome:"Diversidade",            def:"Reconhecimento de múltiplas identidades e perspectivas, entendendo que a variedade enriquece a convivência." },
+  { id: 21, nome:"Empatia",                def:"Capacidade de compreender emoções alheias, colocando-se no lugar do outro sem julgamentos precipitados." },
+  { id: 22, nome:"Espontaneidade",         def:"Disposição a agir de modo natural conforme surge a situação, mantendo a autenticidade mesmo sem roteiro." },
+  { id: 23, nome:"Fantasia",               def:"Uso livre da imaginação para enriquecer vivências, criando cenários internos que ampliam a percepção." },
+  { id: 24, nome:"Fé",                     def:"Convicção em algo que transcende evidências sensoriais, oferecendo sentido e motivação em momentos de incerteza." },
+  { id: 25, nome:"Generosidade",           def:"Disposição para compartilhar recursos e atenção, fortalecendo laços sociais sem buscar retribuição imediata." },
+  { id: 26, nome:"Gratidão",               def:"Reconhecimento consciente dos benefícios recebidos, cultivando postura de apreciação constante." },
+  { id: 27, nome:"Honestidade",            def:"Compromisso com a verdade e coerência entre palavras e ações, sustentando relações baseadas na transparência." },
+  { id: 28, nome:"Humildade",              def:"Reconhecimento sincero das próprias limitações, mantendo postura aberta ao aprendizado e à contribuição alheia." },
+  { id: 29, nome:"Influência",             def:"Capacidade de inspirar mudanças positivas em outros por meio do exemplo e da comunicação clara." },
+  { id: 30, nome:"Intimidade",             def:"Busca por proximidade afetiva que permita compartilhar ideias e emoções de forma genuína e profunda." },
+  { id: 31, nome:"Intuição",               def:"Percepção rápida de padrões ou soluções sem necessidade de análises extensas, orientando decisões ágeis." },
+  { id: 32, nome:"Justiça",                def:"Preocupação em tratar pessoas e situações de modo equilibrado, assegurando que cada um receba o que lhe cabe." },
+  { id: 33, nome:"Lealdade",               def:"Compromisso firme de manter apoio e respeito a vínculos estabelecidos, mesmo em circunstâncias adversas." },
+  { id: 34, nome:"Liberdade",              def:"Condição de agir conforme próprias convicções, assegurando autonomia para escolher e assumir consequências." },
+  { id: 35, nome:"Ordem",                  def:"Preferência por estruturas e procedimentos claros, permitindo conduzir tarefas de forma eficiente." },
+  { id: 36, nome:"Paciência",              def:"Disposição para admitir espera ou dificuldade sem perder a calma, reconhecendo que alguns processos demandam tempo." },
+  { id: 37, nome:"Paz",                    def:"Estado de serenidade interna e harmonia nas relações, reduzindo tensões desnecessárias no convívio diário." },
+  { id: 38, nome:"Perdão",                 def:"Ato de soltar ressentimentos, permitindo reconstruir laços e seguir adiante sem mágoas persistentes." },
+  { id: 39, nome:"Pertencimento",          def:"Sensação de integrar um grupo ou propósito comum, encontrando acolhimento e identidade compartilhada." },
+  { id: 40, nome:"Privacidade",            def:"Manter aspectos pessoais reservados, estabelecendo limites sobre o que se compartilha com os outros." },
+  { id: 41, nome:"Racionalidade",          def:"Predileção por apoiar decisões em argumentos lógicos e dados concretos, buscando clareza e objetividade." },
+  { id: 42, nome:"Resiliência",            def:"Capacidade de enfrentar adversidades e recuperar-se, usando desafios como fonte de fortalecimento." },
+  { id: 43, nome:"Respeito",               def:"Reconhecimento da dignidade e dos limites de cada pessoa, agindo com consideração em todas as interações." },
+  { id: 44, nome:"Responsabilidade",       def:"Consciência de assumir compromissos e cuidar das consequências das próprias ações de forma ética." },
+  { id: 45, nome:"Segurança",              def:"Sensação de proteção que permite agir com tranquilidade, criando base estável para explorar novas possibilidades." },
+  { id: 46, nome:"Simplicidade",           def:"Valorização do essencial, evitando excessos para manter foco no que realmente importa." },
+  { id: 47, nome:"Tradição",               def:"Prática de preservar e repassar costumes e saberes herdados, conectando passado e presente cultural." },
+  { id: 48, nome:"Família",        def:"Investimento ativo nos vínculos com as pessoas que formam o núcleo afetivo próximo, priorizando presença e cuidado nessas relações acima de outras demandas." },
+  { id: 49, nome:"Amor",           def:"Comprometimento duradouro com o bem-estar de alguém específico, expresso por presença consistente, cuidado genuíno e aceitação do outro em sua totalidade." },
+  { id: 50, nome:"Autenticidade",  def:"Compromisso de agir em consonância com quem se é de fato, sem moldar identidade ou comportamentos às expectativas externas." },
+  { id: 51, nome:"Propósito",      def:"Orientação das próprias ações por um sentido que ultrapassa metas imediatas, encontrando significado no impacto gerado ao longo do tempo." },
+  { id: 52, nome:"Autonomia",      def:"Capacidade de tomar decisões a partir de convicções próprias, exercendo autoria sobre a própria vida sem depender de aprovação ou direcionamento externo." },
+  { id: 53, nome:"Integridade",    def:"Coerência consistente entre valores internos, palavras e ações, independentemente da situação ou de quem esteja presente." },
+  { id: 54, nome:"Sabedoria",      def:"Capacidade de integrar experiências e perspectivas diversas para tomar decisões equilibradas diante da complexidade e da incerteza." },
+  { id: 55, nome:"Saúde",          def:"Valorização ativa da vitalidade física como condição essencial para viver plenamente, investindo em hábitos que sustentam o corpo a longo prazo." },
+  { id: 56, nome:"Esperança",      def:"Orientação genuína para o futuro baseada na crença de que mudanças positivas são possíveis, mesmo diante de circunstâncias adversas." },
+  { id: 57, nome:"Realização",     def:"Senso de conquista derivado de ter concluído algo significativo, encontrando satisfação nos resultados concretos produzidos pelo próprio esforço." },
+  { id: 58, nome:"Espiritualidade",def:"Conexão com uma dimensão que transcende o eu individual — seja sagrada, filosófica ou existencial — oferecendo ancoragem interior e senso de pertença ao todo." },
+  { id: 59, nome:"Serviço",        def:"Disposição de direcionar esforços para o benefício de outros ou de causas coletivas, encontrando significado na contribuição que vai além do interesse pessoal." },
+  { id: 60, nome:"Amizade",        def:"Cultivo de laços de confiança e reciprocidade com pessoas escolhidas, investindo consistentemente na profundidade e qualidade dessas conexões." },
+  { id: 61, nome:"Perseverança",   def:"Manutenção do movimento em direção ao que importa mesmo diante de obstáculos repetidos, sem subordinar a continuidade a condições favoráveis." },
+  { id: 62, nome:"Prosperidade",   def:"Busca por condições materiais que ampliem possibilidades e proporcionem tranquilidade financeira, reconhecendo os recursos como meio para uma vida mais plena." }
+];
+
+const N           = VALUES.length; // 63
+const NUM_ROUNDS  = 6;
+const PAIRS_ROUND = Math.floor(N / 2); // 31
+const TOTAL_CMP   = NUM_ROUNDS * PAIRS_ROUND; // 186
+const ELO_START   = 1000;
+const STORAGE_KEY = 'ivp-v2-state';
+
+/* ─── ESTADO ─── */
+let st = {};
+
+function freshState() {
+  return {
+    elo:        new Array(N).fill(ELO_START),
+    usedPairs:  [],           // armazenado como array, convertido para Set em memória
+    byeCount:   new Array(N).fill(0),
+    round:      1,
+    roundPairs: [],
+    pairIdx:    0,
+    answered:   0,
+    log:        [],           // registro completo de cada comparação
+    conflicts:  [],           // conflitos detectados (pós rodadas)
+    conflictIdx:0,
+    phase:      'comparison'  // 'comparison' | 'conflicts' | 'done'
+  };
+}
+
+/* ─── ELO ─── */
+function eloUpdate(rA, rB, scoreA, K) {
+  const eA   = 1 / (1 + Math.pow(10, (rB - rA) / 400));
+  const newA = rA + K * (scoreA - eA);
+  const newB = rB + K * ((1 - scoreA) - (1 - eA));
+  return [newA, newB];
+}
+
+/* ─── SAVE / LOAD ─── */
+function saveState() {
+  try {
+    const toSave = { ...st, savedAt: Date.now() };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch(e) { /* quota exceeded — silent fail */ }
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function clearSaved() { localStorage.removeItem(STORAGE_KEY); }
+
+/* ─── SHUFFLE ─── */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function pairKey(a, b) { return a < b ? `${a}_${b}` : `${b}_${a}`; }
+
+/* ─── GERA PARES DA RODADA ─── */
+function generateRoundPairs() {
+  const usedSet = new Set(st.usedPairs);
+  let order;
+  if (st.round === 1) {
+    order = shuffle([...Array(N).keys()]);
+  } else {
+    order = [...Array(N).keys()].sort((a, b) => {
+      const d = st.elo[b] - st.elo[a];
+      return d !== 0 ? d : Math.random() - 0.5;
+    });
+  }
+
+  const pairs = [];
+  const used  = new Set();
+
+  for (let i = 0; i < order.length; i++) {
+    const a = order[i];
+    if (used.has(a)) continue;
+    let found = false;
+
+    // Prefere par inédito
+    for (let j = i + 1; j < order.length; j++) {
+      const b = order[j];
+      if (used.has(b)) continue;
+      if (!usedSet.has(pairKey(a, b))) {
+        pairs.push([a, b]); used.add(a); used.add(b);
+        st.usedPairs.push(pairKey(a, b));
+        found = true; break;
+      }
+    }
+    // Fallback: repete se necessário
+    if (!found) {
+      for (let j = i + 1; j < order.length; j++) {
+        const b = order[j];
+        if (!used.has(b)) {
+          pairs.push([a, b]); used.add(a); used.add(b);
+          found = true; break;
+        }
+      }
+    }
+    // Sem par → bye
+    if (!found) st.byeCount[a]++;
+  }
+
+  return pairs;
+}
+
+/* ─── CONTROLE ─── */
+function startFresh() {
+  clearSaved();
+  st = freshState();
+  st.roundPairs = generateRoundPairs();
+  showScreen('screen-comparison');
+  renderCmp();
+}
+
+function resumeTest() {
+  const saved = loadSaved();
+  if (!saved) { startFresh(); return; }
+  st = saved;
+  if (st.phase === 'comparison') {
+    showScreen('screen-comparison');
+    renderCmp();
+  } else if (st.phase === 'conflicts') {
+    showScreen('screen-conflicts');
+    renderConflict();
+  } else {
+    showResults();
+  }
+}
+
+function discardAndStart() { startFresh(); }
+
+/* ─── RENDERIZA COMPARAÇÃO ─── */
+let compStartTime = 0;
+let currentSwapped = false;
+let currentDisplayA = 0;
+let currentDisplayB = 0;
+
+function renderCmp() {
+  if (st.pairIdx >= st.roundPairs.length) return; // segurança
+  const [origA, origB] = st.roundPairs[st.pairIdx];
+
+  // Randomizar posição A/B
+  currentSwapped = Math.random() < 0.5;
+  currentDisplayA = currentSwapped ? origB : origA;
+  currentDisplayB = currentSwapped ? origA : origB;
+
+  document.getElementById('def-a').textContent = VALUES[currentDisplayA].def;
+  document.getElementById('def-b').textContent = VALUES[currentDisplayB].def;
+
+  const pct = Math.round((st.answered / TOTAL_CMP) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent =
+    `Comparação ${st.answered + 1} de ${TOTAL_CMP}`;
+  document.getElementById('round-label').textContent =
+    `Rodada ${st.round} de ${NUM_ROUNDS}`;
+
+  compStartTime = Date.now();
+}
+
+/* ─── REGISTRA RESPOSTA ─── */
+function answer(displayApts, displayBpts) {
+  const responseMs = Date.now() - compStartTime;
+  const reflection = (document.getElementById('reflection-input').value || '').trim();
+  document.getElementById('reflection-input').value = ''; // limpa para próxima
+  const [origA, origB] = st.roundPairs[st.pairIdx];
+
+  // Desacoplar posição exibida dos IDs originais
+  const ptsForOrigA = currentSwapped ? displayBpts : displayApts;
+  const ptsForOrigB = currentSwapped ? displayApts : displayBpts;
+
+  // Elo (K=48 para "muito mais", K=32 para o resto)
+  const K       = (displayApts === 4 || displayBpts === 4) ? 48 : 32;
+  const scoreA  = ptsForOrigA > ptsForOrigB ? 1 : ptsForOrigA === ptsForOrigB ? 0.5 : 0;
+  const [nEloA, nEloB] = eloUpdate(st.elo[origA], st.elo[origB], scoreA, K);
+  st.elo[origA] = nEloA;
+  st.elo[origB] = nEloB;
+
+  // Log clínico (oculto do usuário)
+  st.log.push({
+    round:        st.round,
+    origA,        origB,
+    displayedA:   currentDisplayA,
+    displayedB:   currentDisplayB,
+    swapped:      currentSwapped,
+    ptsOrigA:     ptsForOrigA,
+    ptsOrigB:     ptsForOrigB,
+    responseMs,
+    reflection:   reflection || null
+  });
+
+  st.answered++;
+  st.pairIdx++;
+  saveState();
+
+  if (st.pairIdx >= st.roundPairs.length) {
+    st.round++;
+    if (st.round <= NUM_ROUNDS) {
+      st.roundPairs = generateRoundPairs();
+      st.pairIdx    = 0;
+    } else {
+      // Rodadas concluídas → detectar conflitos
+      detectConflicts();
+      if (st.conflicts.length > 0) {
+        st.phase = 'conflicts';
+        st.conflictIdx = 0;
+        saveState();
+        showScreen('screen-conflicts');
+        renderConflict();
+        return;
+      } else {
+        finishTest();
+        return;
+      }
+    }
+  }
+  renderCmp();
+}
+
+/* ─── DETECÇÃO DE INCONSISTÊNCIAS (ciclos de 3) ─── */
+function detectConflicts() {
+  // Construir matriz de preferência a partir do log
+  const pref = {}; // pref[a][b] = ptsForA - ptsForB acumulado
+
+  st.log.forEach(({ origA, origB, ptsOrigA, ptsOrigB }) => {
+    if (!pref[origA]) pref[origA] = {};
+    if (!pref[origB]) pref[origB] = {};
+    pref[origA][origB] = (pref[origA][origB] || 0) + (ptsOrigA - ptsOrigB);
+    pref[origB][origA] = (pref[origB][origA] || 0) + (ptsOrigB - ptsOrigA);
+  });
+
+  // Encontrar triângulos i > j > k > i (ciclos)
+  const vals      = Object.keys(pref).map(Number);
+  const conflicts = [];
+
+  for (let x = 0; x < vals.length; x++) {
+    const i = vals[x];
+    for (let y = x + 1; y < vals.length; y++) {
+      const j = vals[y];
+      if (!pref[i][j]) continue;
+      for (let z = y + 1; z < vals.length; z++) {
+        const k = vals[z];
+        if (!pref[j][k] || !pref[k][i]) continue;
+        // Ciclo i→j→k→i
+        if (pref[i][j] > 0 && pref[j][k] > 0 && pref[k][i] > 0) {
+          conflicts.push([i, j, k]);
+        }
+        // Ciclo i→k→j→i
+        if (pref[i][k] && pref[k][j] && pref[j][i]) {
+          if (pref[i][k] > 0 && pref[k][j] > 0 && pref[j][i] > 0) {
+            conflicts.push([i, k, j]);
+          }
+        }
+      }
+    }
+  }
+
+  // Priorizar conflitos entre valores de Elo mais alto; limitar a 8
+  conflicts.sort((a, b) => {
+    const sumA = a.reduce((s, id) => s + st.elo[id], 0);
+    const sumB = b.reduce((s, id) => s + st.elo[id], 0);
+    return sumB - sumA;
+  });
+
+  st.conflicts = conflicts.slice(0, 8);
+}
+
+/* ─── TELA DE CONFLITOS ─── */
+function renderConflict() {
+  const total = st.conflicts.length;
+  const idx   = st.conflictIdx;
+
+  document.getElementById('conflict-counter').textContent =
+    `Inconsistência ${idx + 1} de ${total}`;
+
+  const [i, j, k] = st.conflicts[idx];
+  const ni = VALUES[i].nome, nj = VALUES[j].nome, nk = VALUES[k].nome;
+
+  document.getElementById('conflict-desc').innerHTML =
+    `<strong>Ciclo detectado</strong>` +
+    `Você indicou: <em>${ni}</em> acima de <em>${nj}</em> · ` +
+    `<em>${nj}</em> acima de <em>${nk}</em> · ` +
+    `<em>${nk}</em> acima de <em>${ni}</em>.`;
+
+  const col = document.getElementById('conflict-3col');
+  col.innerHTML = '';
+  [i, j, k].forEach(id => {
+    const v   = VALUES[id];
+    const div = document.createElement('div');
+    div.className = 'c3card';
+    div.innerHTML = `
+      <div class="c3def">${v.def}</div>
+      <div class="c3name">Nome: <strong>${v.nome}</strong></div>
+      <button class="btn-pick" onclick="resolveConflict(${id})">Este é o mais importante</button>
+    `;
+    col.appendChild(div);
+  });
+}
+
+function resolveConflict(winnerId) {
+  const triple = st.conflicts[st.conflictIdx];
+  // Vencedor ganha Elo sobre os outros dois
+  triple.forEach(id => {
+    if (id === winnerId) return;
+    const [nW, nL] = eloUpdate(st.elo[winnerId], st.elo[id], 1, 24);
+    st.elo[winnerId] = nW;
+    st.elo[id]       = nL;
+  });
+
+  st.conflictIdx++;
+  saveState();
+
+  if (st.conflictIdx >= st.conflicts.length) {
+    finishTest();
+  } else {
+    renderConflict();
+  }
+}
+
+function skipConflicts() { finishTest(); }
+
+/* ─── RESULTADO FINAL ─── */
+function finishTest() {
+  st.phase = 'done';
+  saveState();
+  showResults();
+}
+
+function showResults() {
+  const ranked = [...Array(N).keys()]
+    .sort((a, b) => st.elo[b] - st.elo[a]);
+  const maxElo = st.elo[ranked[0]];
+
+  const tiers = [
+    { lbl:'★  Valores Centrais   (1–5)',       cls:'t-core',      r:[0,5]  },
+    { lbl:'○  Valores Importantes  (6–20)',     cls:'t-important', r:[5,20] },
+    { lbl:'·   Valores Secundários  (21–45)',   cls:'t-secondary', r:[20,45]},
+    { lbl:'·   Valores Periféricos  (46–63)',   cls:'t-periph',    r:[45,63]},
+  ];
+
+  const list = document.getElementById('result-list');
+  list.innerHTML = '';
+
+  tiers.forEach(({ lbl, cls, r: [s, e] }) => {
+    const hdr = document.createElement('div');
+    hdr.className = `tier-hdr ${cls}`;
+    hdr.textContent = lbl;
+    list.appendChild(hdr);
+
+    for (let rank = s; rank < e; rank++) {
+      const id = ranked[rank];
+      const v  = VALUES[id];
+      const el = st.elo[id].toFixed(0);
+      const item = document.createElement('div');
+      item.className = 'r-item';
+      item.innerHTML = `
+        <div class="r-rank${rank < 5 ? ' gd' : ''}">${rank + 1}</div>
+        <div class="r-cont">
+          <div class="r-name">${v.nome}</div>
+          <div class="r-def">${v.def}</div>
+        </div>
+        <div class="r-elo">Elo ${el}</div>
+      `;
+      list.appendChild(item);
+    }
+  });
+
+  document.getElementById('res-sub').textContent =
+    `${st.answered} comparações · ${N} valores · Algoritmo Elo adaptativo`;
+
+  buildDiary();
+  buildClinical(ranked);
+  showScreen('screen-results');
+  clearSaved();
+}
+
+/* ─── DIÁRIO DE REFLEXÕES ─── */
+function buildDiary() {
+  const entries = st.log.filter(e => e.reflection);
+  if (!entries.length) return;
+
+  document.getElementById('diary-block').style.display = 'block';
+
+  const styles = `
+    .diary-entry { padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .diary-entry:last-child { border-bottom: none; }
+    .diary-meta {
+      font-size: 11px; font-family: Arial,sans-serif; color: var(--muted);
+      margin-bottom: 8px; letter-spacing: .3px;
+    }
+    .diary-pair {
+      font-size: 13px; color: var(--sub); margin-bottom: 10px;
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .diary-def {
+      flex: 1; font-size: 13px; line-height: 1.6; color: var(--sub);
+      background: var(--bg); border-radius: 6px; padding: 8px 10px;
+    }
+    .diary-vs {
+      font-size: 11px; font-family: Arial,sans-serif; color: var(--muted);
+      padding-top: 10px; white-space: nowrap;
+    }
+    .diary-decision {
+      font-size: 11px; font-family: Arial,sans-serif; color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .diary-text {
+      font-size: 14px; line-height: 1.75; color: var(--text);
+      white-space: pre-wrap; font-style: italic;
+      border-left: 3px solid var(--primary); padding-left: 14px;
+    }
+  `;
+
+  // Inject styles once
+  if (!document.getElementById('diary-styles')) {
+    const s = document.createElement('style');
+    s.id = 'diary-styles'; s.textContent = styles;
+    document.head.appendChild(s);
+  }
+
+  let html = `<p style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.6;">
+    ${entries.length} reflexão${entries.length > 1 ? 'ões registradas' : ' registrada'} durante o inventário.
+  </p>`;
+
+  entries.forEach((e, idx) => {
+    const vA  = VALUES[e.origA];
+    const vB  = VALUES[e.origB];
+    const won = e.ptsOrigA > e.ptsOrigB ? `Escolheu A (${vA.nome})`
+              : e.ptsOrigB > e.ptsOrigA ? `Escolheu B (${vB.nome})`
+              : 'Considerou equivalentes';
+
+    html += `<div class="diary-entry">
+      <div class="diary-meta">Reflexão ${idx + 1} &nbsp;·&nbsp; Rodada ${e.round} &nbsp;·&nbsp; Comparação ${e.ptsOrigA !== undefined ? '' : ''}${idx + 1}</div>
+      <div class="diary-pair">
+        <div class="diary-def">${vA.def}</div>
+        <div class="diary-vs">vs</div>
+        <div class="diary-def">${vB.def}</div>
+      </div>
+      <div class="diary-decision">↳ ${won}</div>
+      <div class="diary-text">${e.reflection}</div>
+    </div>`;
+  });
+
+  document.getElementById('diary-inner').innerHTML = html;
+}
+
+/* ─── DADOS CLÍNICOS ─── */
+function buildClinical(ranked) {
+  const log = st.log;
+  if (!log.length) return;
+
+  const avg = Math.round(log.reduce((s, e) => s + e.responseMs, 0) / log.length);
+  const sorted_slow  = [...log].sort((a, b) => b.responseMs - a.responseMs).slice(0, 8);
+  const sorted_fast  = [...log].sort((a, b) => a.responseMs - b.responseMs).slice(0, 5);
+
+  // Viés de posição: quantas vezes o "Valor A" exibido venceu vs perdeu
+  const posA_wins   = log.filter(e => e.ptsOrigA > e.ptsOrigB && !e.swapped ||
+                                      e.ptsOrigB > e.ptsOrigA &&  e.swapped).length;
+  const posB_wins   = log.filter(e => e.ptsOrigB > e.ptsOrigA && !e.swapped ||
+                                      e.ptsOrigA > e.ptsOrigB &&  e.swapped).length;
+  const posA_pct    = Math.round((posA_wins / log.length) * 100);
+  const posB_pct    = Math.round((posB_wins / log.length) * 100);
+
+  let html = '';
+
+  // Estatísticas gerais
+  html += `<div class="c-section-title">Tempo de Resposta</div>`;
+  html += kv('Tempo médio por comparação', fmtMs(avg));
+  html += kv('Comparações realizadas', `${st.answered} de ${TOTAL_CMP}`);
+  html += kv('Inconsistências detectadas', `${st.conflicts.length}`);
+  html += kv('Inconsistências resolvidas', `${Math.min(st.conflictIdx, st.conflicts.length)}`);
+
+  // Viés de posição
+  html += `<div class="c-section-title">Viés de Posição (A/B)</div>`;
+  html += kv('Vitórias do valor exibido à esquerda (Pos. A)', `${posA_wins} (${posA_pct}%)`);
+  html += kv('Vitórias do valor exibido à direita (Pos. B)', `${posB_wins} (${posB_pct}%)`);
+  html += `<div style="font-size:12px;color:var(--muted);margin-top:6px;">
+    Ausência de viés esperada: ~50%/50%. Desvio significativo (>60%) pode indicar tendência de escolha por posição.
+  </div>`;
+
+  // Comparações mais lentas
+  html += `<div class="c-section-title">8 Comparações mais Hesitantes</div>`;
+  sorted_slow.forEach(e => {
+    html += `<div class="slow-item">
+      <div class="slow-time">${fmtMs(e.responseMs)}</div>
+      <div class="slow-names"><strong>${VALUES[e.origA].nome}</strong> vs <strong>${VALUES[e.origB].nome}</strong>
+        &nbsp;<span style="color:var(--muted);font-size:11px;">(Rodada ${e.round})</span></div>
+    </div>`;
+  });
+
+  // Comparações mais rápidas
+  html += `<div class="c-section-title">5 Comparações mais Rápidas (possível automatismo)</div>`;
+  sorted_fast.forEach(e => {
+    html += `<div class="slow-item">
+      <div class="slow-time" style="color:var(--primary)">${fmtMs(e.responseMs)}</div>
+      <div class="slow-names"><strong>${VALUES[e.origA].nome}</strong> vs <strong>${VALUES[e.origB].nome}</strong>
+        &nbsp;<span style="color:var(--muted);font-size:11px;">(Rodada ${e.round})</span></div>
+    </div>`;
+  });
+
+  document.getElementById('clinical-inner').innerHTML = html;
+}
+
+function kv(k, v) {
+  return `<div class="c-kv"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+}
+function fmtMs(ms) {
+  return ms >= 60000
+    ? `${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`
+    : ms >= 1000
+    ? `${(ms/1000).toFixed(1)}s`
+    : `${ms}ms`;
+}
+
+/* ─── UTILS ─── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goWelcome() {
+  clearSaved();
+  location.reload();
+}
+
+/* ─── TECLADO 1–5 ─── */
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('screen-comparison').classList.contains('active')) return;
+  // Não acionar atalhos quando o usuário estiver digitando na reflexão
+  if (document.activeElement === document.getElementById('reflection-input')) return;
+  const map = { '1':[4,0], '2':[2,0], '3':[1,1], '4':[0,2], '5':[0,4] };
+  if (!map[e.key]) return;
+  const btn = document.getElementById('btn' + e.key);
+  btn.classList.add('pressed');
+  setTimeout(() => btn.classList.remove('pressed'), 130);
+  answer(...map[e.key]);
+});
+
+/* ─── INIT: verificar progresso salvo ─── */
+(function init() {
+  const saved = loadSaved();
+  if (saved && saved.phase !== 'done' && saved.answered > 0) {
+    const pct  = Math.round((saved.answered / TOTAL_CMP) * 100);
+    const date = new Date(saved.savedAt);
+    const fmt  = date.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' })
+                 + ' às ' + date.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('resume-info').textContent =
+      `Salvo em ${fmt} · Comparação ${saved.answered} de ${TOTAL_CMP} (${pct}% concluído)`;
+    document.getElementById('resume-banner').style.display = 'flex';
+    document.getElementById('btn-discard').style.display   = 'block';
+  }
+})();
+</script>
+</body>
+</html>
